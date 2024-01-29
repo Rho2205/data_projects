@@ -1,0 +1,98 @@
+---
+title: "Smart devices usage"
+output: html_notebook
+---
+
+# CONTEXT
+Bellabeat is a high-tech company that manufactures health-focused smart products since 2013. Their products:
+* **Bellabeat app**: provides users with health data related to their activity, sleep, stress,
+menstrual cycle, and mindfulness habits. It connects to their line of smart wellness products.
+* **Leaf**: a wellness tracker can be worn as a bracelet, necklace, or clip. It connects to the Bellabeat app to track activity, sleep, and stress.
+* **Time**: a wellness watch to track user activity, sleep, and stress. It connects to the Bellabeat app to provide daily wellness.
+* **Spring**: a water bottle that tracks daily water intake that connects to the Bellabeat app to track
+hydration levels.
+* **Bellabeat membership**: a subscription-based membership program for users that gives 24/7 access to fully personalized guidance on nutrition, activity, sleep, health and beauty, and mindfulness based on their lifestyle and goals.
+
+Bellabeat wants to get insights about the smart devices usage in order to obtain trends that help their marketing strategy.
+
+# ASK
+
+##Business task
+Analyze smart device usage to gain insights into how people are already using their smart devices and provide high-level recommendations to improve marketing strategies for Bellabeat.
+
+##Business use case
+* Determine trends for smart device usage
+* How could these trends apply to Bellabeat 'Time' customers?
+* How could these trends help to improve Bellabeat's marketing strategy?
+
+# PREPARE
+For the analysis, I will use a custum survey (First-party data) in order to get updated data related to smartwatch usages, and use R with RStudio to perform the analysis task.
+
+## Building the survey
+### Platform
+Build in Google Forms and available in 2 languages: English and Spanish. 
+### Distribution
+Distribuited trough a link using LinkedIn post, Instagram stories and Whatsapp groups. No restrictions to share the link.
+### Time frame
+Available for 4 days, starting on 01/26/2024
+### Configuration
+Anonymous survey
+### Questions
+#### Demographic questions
+* Gender
+* Age
+* Geopraphic location
+
+#### Smartwatch usage questions
+* Main usage: multiple choice, with the option to add a custom answer
+* Usage periodicity: scale from 0 to 7 representing usage in days
+* Brand: multiple choice, listing main brand collected from sites like Amazon, Tiendamia, Mercado Libre. Option for add custom answer.
+* Features used: checkboxs, listing main features offered by smartwatches on the market. Option for add custom answer.
+* Tracked functionalities: checkboxs, listing main tracker options offers the smartwatches on the market. Option for add custom answer.
+* Activities tracked: checkboxs, listing main sport activities tracked for the smartwatches on the market. Option for add custom answer.
+
+
+
+
+
+## Evaluate data
+Installing packages
+```{r Installing packages, echo=FALSE}
+install.packages("tidyverse")
+library(tidyverse)
+
+install.packages("skimr")
+library(skimr)
+```
+
+Importing data
+```{r Importing fitbit files}
+
+```
+
+Running basics evaluations over data
+```{r Get a summary of daily_activity, echo=FALSE}
+skim_without_charts(daily_activity)
+str(daily_activity)
+head(daily_activity)
+```
+
+# PROCESS
+## Preparing environment for cleaning data
+```{r Installing janitor package}
+install.packages("janitor")
+library(janitor)
+```
+
+Cleaning dataset names (names to snake_case)
+```{r}
+daily_activity_cleaned <- daily_activity %>% clean_names() %>% remove_empty(c("rows", "cols"))
+```
+daily_calories_cleaned <- clean_names(daily_calories)
+daily_intensities_cleaned <- clean_names(daily_intensities)
+daily_steps_cleaned <- clean_names(daily_steps)
+daily_sleep_cleaned <- clean_names(daily_sleep)
+seconds_heart_rate_cleaned <- clean_names(seconds_heart_rate)
+weight_log_info_cleaned <- clean_names(weight_log_info)
+```
+

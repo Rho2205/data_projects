@@ -1256,141 +1256,192 @@ ggplot(data = location_usage) +
   theme_bw()
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Features
 
 #### Features vs Gender
 
 We want to identify if there are a relation between the used features of a smartwatch and the user's gender.
 
-```{r Features - Gender: dataset calculation}
+```{r Features - Gender: dataset calculation, message=FALSE, warning=FALSE}
 gender_features <- features_grouped_rows %>% 
   group_by(gender, features_grouped) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(features_grouped)
 ```
 
 ```{r Features - Gender: Percentage}
 # Chart
-ggplot(gender_features, aes(x = factor(gender), y = perc*100, fill = factor(features_grouped))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Gender", y = "Percent", fill = "features_grouped", title = "Percentage distribution of 'Features' per Gender") +
+ggplot(gender_features, aes(x = factor(gender), y = perc * 100, fill = factor(features_grouped))) +
+  geom_bar(stat = "identity", width = 0.7, position = "fill") +
+  labs(x = "Gender", y = "Percent", fill = "features_grouped", title = "Percentage distribution of Features per Gender") +
   theme_minimal(base_size = 14) +
   geom_text(data = gender_features, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Features"))
+  guides(fill = guide_legend(title = "Features"))
 ```
 
-```{r Features - Gender: Grouped by Gender, warning=TRUE}
-# Grouped
-ggplot(data = gender_features, aes(fill = features_grouped, y = count, x = gender)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Gender", y = "Count", title = "Distribution of Features per Gender", subtitle = "Features grouped by Gender") +
-  guides(fill=guide_legend(title="Gender")) 
+```{r Features - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = gender_features) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = features_grouped, group = features_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Features per Gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Features - Gender - Grouped by Perc Features, warning=TRUE}
-# Grouped
-ggplot(data = gender_features, aes(fill = features_grouped, y = perc * 100, x = gender)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Gender", y = "Percentage", title = "Percentage distribution of Features per Gender", subtitle = "Features grouped by gender") +
-  guides(fill = guide_legend(title = "Features")) 
+```{r Features - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = gender_features) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = features_grouped, group = features_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Features per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
 #### Features vs Age
 
 We want to identify if there are a relation between the used features of a smartwatch and the user's age.
 
-```{r Features - Age: dataset calculation}
+```{r Features - Age: dataset calculation, message=FALSE, warning=FALSE}
 age_features <- features_grouped_rows %>% 
   group_by(age, features_grouped) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
   drop_na(features_grouped)
 ```
 
 ```{r Features - Age: Percentage}
 # Chart
-ggplot(age_features, aes(x = factor(age), y = perc*100, fill = factor(features_grouped))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Age", y = "Percent", fill = "features_grouped", title = "Percentage distribution of 'Features' per Age") +
+ggplot(age_features, aes(x = factor(age), y = perc * 100, fill = factor(features_grouped))) +
+  geom_bar(stat = "identity", width = 0.7, position = "fill") +
+  labs(x = "Age", y = "Percent", fill = "features_grouped", title = "Percentage distribution of Features per Age") +
   theme_minimal(base_size = 14) +
   geom_text(data = age_features, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Features")) +
+  guides(fill = guide_legend(title = "Features")) +
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Features - Age: Grouped by Age, warning=TRUE}
-# Grouped
-ggplot(data = age_features, aes(fill = features_grouped, y = count, x = age)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Age", y = "Count", title = "Distribution of Features per Age", subtitle = "Features grouped by Age") +
-  guides(fill=guide_legend(title="Age")) 
+```{r Features - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = age_features) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = features_grouped, group = features_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Features per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Features - Age - Grouped by Perc Features, warning=TRUE}
-# Grouped
-ggplot(data = age_features, aes(fill = features_grouped, y = perc * 100, x = age)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Age", y = "Percentage", title = "Percentage distribution of Features per Age", subtitle = "Features grouped by age") +
-  guides(fill = guide_legend(title = "Features")) 
+```{r Features - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = age_features) + 
+  geom_bar(
+    aes(x = age, y = count, fill = features_grouped, group = features_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Features per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
 #### Features vs Location
 
 We want to identify if there are a relation between the features of a smartwatch and the user's location
 
-```{r Features - Location: dataset calculation}
+```{r Features - Location: dataset calculation, message=FALSE, warning=FALSE}
 location_features <- features_grouped_rows %>% 
   group_by(location, features_grouped) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(features_grouped)
 ```
 
 ```{r Features - Location: Percentage}
 # Chart
-ggplot(location_features, aes(x = factor(location), y = perc*100, fill = factor(features_grouped))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
+ggplot(location_features, aes(x = factor(location), y = perc * 100, fill = factor(features_grouped))) +
+  geom_bar(stat = "identity", width = 0.7, position = "fill") +
   labs(x = "Location", y = "Percent", fill = "features_grouped", title = "Percentage distribution of Features per Location") +
   theme_minimal(base_size = 14) +
   geom_text(data = location_features, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Features")) +
+  guides(fill = guide_legend(title = "Features")) +
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Features - Location: Grouped by Location, warning=TRUE}
-# Grouped
-ggplot(data = location_features, aes(fill = features_grouped, y = count, x = location)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Location", y = "Count", title = "Distribution of Features per Location", subtitle = "Features grouped by Location") +
-  guides(fill=guide_legend(title="Location")) 
+```{r Features - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = location_features) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = features_grouped, group = features_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Features per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Features - Location - Grouped by Perc Features, warning=TRUE}
-# Grouped
-ggplot(data = location_features, aes(fill = features_grouped, y = perc * 100, x = location)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Location", y = "Percentage", title = "Percentage distribution of Features per Location", subtitle = "Features grouped by location") +
-  guides(fill = guide_legend(title = "Features")) 
+```{r Features - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = location_features) + 
+  geom_bar(
+    aes(x = location, y = count, fill = features_grouped, group = features_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = features_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Features per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Functionalities
 

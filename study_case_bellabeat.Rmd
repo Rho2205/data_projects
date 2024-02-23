@@ -327,6 +327,18 @@ functionalities_grouped_rows <- mutate(functionalities_rows, functionalities = c
 ))
 unique(functionalities_grouped_rows['functionalities'])
 ``` 
+
+```{r Creating a new column with mutated grouped values in English for Functionalities}
+functionalities_grouped_rows <- mutate(functionalities_grouped_rows, functionalities_grouped = case_when(
+  grepl('(?i)sport|(?i)distance|(?i)altitude', functionalities) ~ 'Sports',
+  grepl('(?i)blood|(?i)heart|(?i)sleep|(?i)temperature|(?i)oxygen|(?i)noise', functionalities) ~ 'Realtime health tracker',
+  grepl('(?i)calories|(?i)water|(?i)weight|(?i)menstrual', functionalities) ~ 'Manual health tracker',
+  grepl('(?i)stress|(?i)Mindfulness', functionalities) ~ 'Wellbeing',
+  
+  TRUE ~ functionalities
+))
+unique(functionalities_grouped_rows['functionalities_grouped'])
+``` 
  
 ### Activities
 'activities' is a question to determine which are the sport activities most tracked for the smartwatch users.They should mark as many activities as they track on their smartwatches. So, we need to split all this checked options into different rows to process them that way. 
@@ -345,24 +357,15 @@ unique(activities_rows['activities_dirty'])
 
 ```{r Creating a new column with mutated values in English for Activities}
 activities_grouped_rows <- mutate(activities_rows, activities = case_when(
-  grepl('(?i)caminata|(?i)pasos', activities_dirty) ~ 'Walking',
-  grepl('(?i)hiking|(?i)trakking|(?i)senderismo', activities_dirty) ~ 'Hiking / Trekking',
-  grepl('(?i)natación|(?i)natacion', activities_dirty) ~ 'Swimming',
+  grepl('(?i)caminata|(?i)pasos|(?i)walking|(?i)patinar|(?i)skating|(?i)bailar|(?i)dancing', activities_dirty) ~ 'Urban sports',
+  grepl('(?i)correr|(?i)running|(?i)ciclismo|(?i)cycling|(?i)tenis|(?i)tennis|(?i)futbol|(?i)football|(?i)soccer|(?i)enduro', activities_dirty) ~ 'Professional sports',
+  grepl('(?i)hiking|(?i)trakking|(?i)senderismo|(?i)splitboard|(?i)esqui|(?i)esquí|(?i)ski|(?i)escalada|(?i)climbing', activities_dirty) ~ 'Mountain sports',
+  grepl('(?i)natación|(?i)natacion|(?i)swimming|(?i)buceo|(?i)diving', activities_dirty) ~ 'Water sports',
   grepl('(?i)gimnasio|(?i)gym|(?i)entrenamiento', activities_dirty) ~ 'General gym training',
   grepl('(?i)fuerza|(?i)crossfit|(?i)funcional|(?i)cross|(?i)strong|(?i)fitness|(?i)weight|(?i)strength|(?i)workouts', activities_dirty) ~ 'Strength and endurance sports',
   grepl('(?i)pilates|(?i)yoga|(?i)stretching|(?i)meditation', activities_dirty) ~ 'Relaxing sports',
+
   grepl('(?i)ninguna|(?i)hora', activities_dirty) ~ NA,
-  grepl('(?i)tenis', activities_dirty) ~ 'Tennis',
-  grepl('(?i)correr', activities_dirty) ~ 'Running',
-  grepl('(?i)ciclismo', activities_dirty) ~ 'Cycling',
-  grepl('(?i)futbol', activities_dirty) ~ 'Football / Soccer',
-  grepl('(?i)enduro', activities_dirty) ~ 'Enduro motorcycle',
-  grepl('(?i)splitboard', activities_dirty) ~ 'Splitboarding',
-  grepl('(?i)buceo', activities_dirty) ~ 'Diving',
-  grepl('(?i)patinar', activities_dirty) ~ 'Skating',
-  grepl('(?i)escalada', activities_dirty) ~ 'Climbing',
-  grepl('(?i)esqui|(?i)esquí|(?i)ski', activities_dirty) ~ 'Skiing',
-  grepl('(?i)bailar|(?i)dancing', activities_dirty) ~ 'Dancing',
   
   TRUE ~ activities_dirty
 ))
@@ -400,7 +403,7 @@ PieChart(gender_table, hole = 0, values = "%", main = "Gender distribution", fil
 
 We created age groups, with a range of 10 years each.
 
-```{r Gender distribution}
+```{r Age distribution}
 age_table <- table(swu['age'])
 
 PieChart(age_table, hole = 0, values = "%", main = "Age distribution", fill = "reds")
@@ -508,7 +511,7 @@ ggplot(data = age_perc) +
 
 #### Age vs Location
 
-```{r Age - Dataset calculation, message=FALSE, warning=FALSE}
+```{r Age - Location: Dataset calculation, message=FALSE, warning=FALSE}
 age_loc_perc <- swu %>% 
   group_by(location, age) %>% 
   summarise(count = n()) %>% 
@@ -536,7 +539,7 @@ ggplot(data = age_loc_perc) +
   geom_text(
     aes(x = location, y = perc, label = ratio, group = age),
     position = position_dodge(width = 1),
-    vjust = -0.5, size = 3
+    vjust = 0.1, size = 3
   ) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
   labs(x = "Location", y = "Percentage", title = "Distribution of Age per Location (%)", subtitle = "Grouped bars version") +
@@ -553,7 +556,7 @@ ggplot(data = age_loc_perc) +
   geom_text(
     aes(x = location, y = count, label = count, group = age),
     position = position_dodge(width = 1),
-    vjust = -0.5, size = 3
+    vjust = 0.1, size = 3
   ) +
   labs(x = "Location", y = "Count", title = "Distribution of Age per Location (Count)", subtitle = "Grouped bars version") +
   theme_bw()
@@ -596,9 +599,6 @@ ggplot(data = gender_loc_perc) +
   labs(x = "Location", y = "Count", title = "Distribution of Gender per Location (Count)", subtitle = "Grouped bars version") +
   theme_bw()
 ```
-
-
-
 
 
 ## Smartwatch usage trends
@@ -657,7 +657,8 @@ swu %>%
   geom_bar() +
   coord_flip() +
   theme(legend.position="none")+
-  labs(x = "Main usage", y = "Count", title = 'Main usage of smartwatches')
+  labs(x = "Main usage", y = "Count", title = 'Main usage of smartwatches') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = -0.1)
 ```
 
 ### Features
@@ -671,7 +672,8 @@ features_rows %>%
   geom_bar() +
   coord_flip() +
   theme(legend.position="none")+
-  labs(x = "Features", y = "Count", title = 'Popular features of smartwatches')
+  labs(x = "Features", y = "Count", title = 'Popular features of smartwatches') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = -0.1)
 ```
 
 We create larger categories from features to get a bigger picture of the trends
@@ -683,7 +685,8 @@ features_grouped_rows %>%
   geom_bar() +
   coord_flip() +
   theme(legend.position="none")+
-  labs(x = "Features", y = "Count", title = 'Popular grouped features of smartwatches')
+  labs(x = "Features", y = "Count", title = 'Popular grouped features of smartwatches') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = -0.1)
 ```
 
 ### Functionalities
@@ -697,8 +700,23 @@ functionalities_grouped_rows %>% drop_na(functionalities) %>%
   geom_bar() +
   coord_flip() +
   theme(legend.position="none")+
-  labs(x = "Tracked functionalities", y = "Count", title = 'Popular tracked functionalities of smartwatches')
+  labs(x = "Tracked functionalities", y = "Count", title = 'Popular tracked functionalities of smartwatches') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = -0.1)
 ```
+
+We create larger categories from functionalities to get a bigger picture of the trends
+
+```{r Functionalities grouped trends} 
+# Reorder from highest frequency to lowest frequency
+functionalities_grouped_rows %>% drop_na(functionalities_grouped) %>% 
+  ggplot(aes(x = fct_rev(fct_infreq(functionalities_grouped)), fill = "orange", alpha=.6, width=.4)) +
+  geom_bar() +
+  coord_flip() +
+  theme(legend.position="none")+
+  labs(x = "Functionalities", y = "Count", title = 'Popular grouped functionalities of smartwatches') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = 1.1)
+```
+
 
 ### User activities
 
@@ -711,10 +729,366 @@ activities_grouped_rows %>% drop_na(activities) %>%
   geom_bar() +
   coord_flip() +
   theme(legend.position="none")+
-  labs(x = "Sport activities", y = "Count", title = 'Popular sport activities tracked by users')
+  labs(x = "Sport activities", y = "Count", title = 'Popular sport activities tracked by users') +
+  geom_text(aes(label = ..count..), stat = "count", vjust = 0.5, hjust = 1.1)
 ```
 
 ## Establishing relations between variables
+
+### Periodicity
+
+#### Periodicity vs Gender
+
+We want to identify if there are a relation between the periodicity of a smartwatch and the user's gender
+
+```{r Periodicity - Gender: dataset calculation, message=FALSE, warning=FALSE}
+periodicity_gender <- swu %>% 
+  group_by(gender, periodicity) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(periodicity)
+```
+
+```{r Periodicity - Gender: Percentage, warning=TRUE}
+# Chart
+ggplot(periodicity_gender, aes(x = factor(gender), y = perc*100, fill = factor(periodicity))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Gender", y = "Percent", fill = "periodicity", title = "Percentage distribution of Periodicity per Gender") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = periodicity_gender, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title="Periodicity"))
+```
+
+```{r Periodicity - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = periodicity_gender) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = -0.5, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Periodicity per Gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Periodicity - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = periodicity_gender) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = -0.5, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Periodicity per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Periodicity vs Age
+
+We want to identify if there are a relation between the periodicity of a smartwatch and the user's age
+
+```{r Periodicity - Age: dataset calculation, message=FALSE, warning=FALSE}
+periodicity_age <- swu %>% 
+  group_by(age, periodicity) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(periodicity)
+```
+
+```{r Periodicity - Age: Percentage, warning=TRUE}
+# Chart
+ggplot(periodicity_age, aes(x = factor(age), y = perc*100, fill = factor(periodicity))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Age", y = "Percent", fill = "periodicity", title = "Percentage distribution of Periodicity per Age") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = periodicity_age, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title="Periodicity"))
+```
+
+```{r Periodicity - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = periodicity_age) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = -0.5, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Periodicity per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Periodicity - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = periodicity_age) + 
+  geom_bar(
+    aes(x = age, y = count, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Periodicity per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Periodicity vs Location
+
+We want to identify if there are a relation between the periodicity of a smartwatch and the user's location
+
+```{r Periodicity - Location: dataset calculation, message=FALSE, warning=FALSE}
+periodicity_location <- swu %>% 
+  group_by(location, periodicity) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(periodicity)
+```
+
+```{r Periodicity - Location: Percentage, warning=TRUE}
+# Chart
+ggplot(periodicity_location, aes(x = factor(location), y = perc*100, fill = factor(periodicity))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Location", y = "Percent", fill = "periodicity", title = "Percentage distribution of Periodicity per Location") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = periodicity_location, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title="Periodicity")) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+```{r Periodicity - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = periodicity_location) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Periodicity per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Periodicity - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = periodicity_location) + 
+  geom_bar(
+    aes(x = location, y = count, fill = periodicity, group = periodicity), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = periodicity),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Periodicity per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+
+#### Brand vs Gender
+
+We want to identify if there are a relation between the brand of a smartwatch and the user's gender
+
+```{r Brand - Gender: dataset calculation, message=FALSE, warning=FALSE}
+brand_gender <- swu %>% 
+  group_by(gender, brand) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(brand)
+```
+
+```{r Brand - Gender: Percentage, warning=TRUE}
+# Chart
+ggplot(brand_gender, aes(x = factor(gender), y = perc * 100, fill = factor(brand))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Gender", y = "Percent", fill = "brand", title = "Percentage distribution of Brand per Gender") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = brand_gender, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title = "Brand"))
+```
+
+```{r Brand - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = brand_gender) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Brand per gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Brand - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = brand_gender) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Brand per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Brand vs Age
+
+We want to identify if there are a relation between the brand of a smartwatch and the user's age
+
+```{r Brand - Age: dataset calculation, message=FALSE, warning=FALSE}
+brand_age <- swu %>% 
+  group_by(age, brand) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(brand)
+```
+
+```{r Brand - Age: Percentage, warning=TRUE}
+# Chart
+ggplot(brand_age, aes(x = factor(age), y = perc * 100, fill = factor(brand))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Age", y = "Percent", fill = "brand", title = "Percentage distribution of Brand per Age") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = brand_age, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title = "Brand"))
+```
+
+```{r Brand - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = brand_age) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Brand per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Brand - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = brand_age) + 
+  geom_bar(
+    aes(x = age, y = count, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Brand per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Brand vs Location
+
+We want to identify if there are a relation between the brand of a smartwatch and the user's location
+
+```{r Brand - Location: dataset calculation, message=FALSE, warning=FALSE}
+brand_location <- swu %>% 
+  group_by(location, brand) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(brand)
+```
+
+```{r Brand - Location: Percentage, warning=TRUE}
+# Chart
+ggplot(brand_location, aes(x = factor(location), y = perc * 100, fill = factor(brand))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Location", y = "Percent", fill = "brand", title = "Percentage distribution of Brand per Location") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = brand_location, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title = "Brand"))
+```
+
+```{r Brand - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = brand_location) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Brand per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Brand - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = brand_location) + 
+  geom_bar(
+    aes(x = location, y = count, fill = brand, group = brand), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = brand),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Brand per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
 
 ### Usage
 
@@ -966,7 +1340,7 @@ ggplot(data = location_features, aes(fill = features_grouped, y = perc * 100, x 
 
 We want to identify if there are a relation between the functionalities of a smartwatch and the user's gender.
 
-```{r Features - Location: dataset calculation}
+```{r Functionalities - Gender: dataset calculation}
 gender_functionalities <- functionalities_grouped_rows %>% 
   group_by(gender, functionalities) %>% 
   summarise(count = n()) %>% 
@@ -975,7 +1349,7 @@ gender_functionalities <- functionalities_grouped_rows %>%
 ```
 
 
-```{r Gender - Functionalities relation}
+```{r Functionalities - Gender relation}
 # Chart
 ggplot(gender_functionalities, aes(x = factor(gender), y = perc*100, fill = factor(functionalities))) +
   geom_bar(stat="identity", width = 0.7, position="fill") +
@@ -1028,7 +1402,7 @@ ggplot(age_functionalities, aes(x = factor(age), y = perc*100, fill = factor(fun
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Funcionalities - Gender: Grouped by Gender, warning=TRUE}
+```{r Funcionalities - Age: Grouped by Gender, warning=TRUE}
 # Grouped
 ggplot(data = gender_functionalities, aes(fill = functionalities, y = count, x = gender)) + 
   geom_bar(position="dodge", stat="identity") + 

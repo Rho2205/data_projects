@@ -1081,136 +1081,194 @@ ggplot(data = brand_location) +
   theme_bw()
 ```
 
-
-
-
-
-
-
-
-
-
 ### Usage
 
 #### Usage vs Gender
 
 We want to identify if there are a relation between the usage of a smartwatch and the user's gender
 
-```{r Usage - Gender: dataset calculation}
-gender_main_usage <- swu %>% 
+```{r Usage - Gender: dataset calculation, message=FALSE, warning=FALSE}
+gender_usage <- swu %>% 
   group_by(gender, usage) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count)))%>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(usage)
 ```
 
 ```{r Usage - Gender: Percentage, warning=TRUE}
 # Chart
-ggplot(gender_main_usage, aes(x = factor(gender), y = perc*100, fill = factor(usage))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
+ggplot(gender_usage, aes(x = factor(gender), y = perc * 100, fill = factor(usage))) +
+  geom_bar(stat ="identity", width = 0.7, position = "fill") +
   labs(x = "Gender", y = "Percent", fill = "usage", title = "Percentage distribution of Usage per Gender") +
   theme_minimal(base_size = 14) +
-  geom_text(data = gender_main_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  geom_text(data = gender_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
   guides(fill = guide_legend(title="Usage"))
 ```
 
-```{r Usage - Gender - Grouped by Usage, warning=TRUE}
-# Grouped
-ggplot(data = gender_main_usage, aes(fill = usage, y = count, x = gender)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Gender", y = "Count", title = "Distribution of Usage per Gender", subtitle = "Usage grouped by gender") +
-  guides(fill=guide_legend(title="Usage")) 
+```{r Usage - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = gender_usage) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Usage per Gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Usage - Gender - Grouped by Perc Usage, warning=TRUE}
-# Grouped
-ggplot(data = gender_main_usage, aes(fill = usage, y = perc * 100, x = gender)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Gender", y = "Percentage", title = "Percentage distribution of Usage per Gender", subtitle = "Usage grouped by gender") +
-  guides(fill=guide_legend(title="Usage")) 
+```{r Usage - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = gender_usage) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Usage per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
 #### Usage vs Age
 
 We want to identify if there are a relation between the usage of a smartwatch and the user's age
 
-```{r Usage - Age: dataset calculation}
-age_main_usage <- swu %>% 
+```{r Usage - Age: dataset calculation, message=FALSE, warning=FALSE}
+age_usage <- swu %>% 
   group_by(age, usage) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(usage)
 ```
 
 ```{r Usage - Age: Percentage}
 # Chart
-ggplot(age_main_usage, aes(x = factor(age), y = perc*100, fill = factor(usage))) +
+ggplot(age_usage, aes(x = factor(age), y = perc * 100, fill = factor(usage))) +
   geom_bar(stat="identity", width = 0.7, position="fill") +
   labs(x = "Age", y = "Percent", fill = "usage", title = "Percentage distribution of Usage per Age") +
   theme_minimal(base_size = 14) +
-  geom_text(data = age_main_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  geom_text(data = age_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Usage")) +
+  guides(fill = guide_legend(title = "Usage")) +
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Usage - Gender - Grouped by Gender, warning=TRUE}
-# Grouped
-ggplot(data = age_main_usage, aes(fill = usage, y = count, x = age)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Age groups", y = "Count", title = "Distribution of Usage per Age", subtitle = "Usage grouped by Age") +
-  guides(fill=guide_legend(title="Age")) 
+```{r Usage - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = age_usage) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Usage per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Usage - Age - Grouped by Perc Usage, warning=TRUE}
-# Grouped
-ggplot(data = age_main_usage, aes(fill = usage, y = perc * 100, x = age)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Age", y = "Percentage", title = "Percentage distribution of Usage per Age", subtitle = "Usage grouped by age") +
-  guides(fill = guide_legend(title = "Usage")) 
+```{r Usage - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = age_usage) + 
+  geom_bar(
+    aes(x = age, y = count, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Usage per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
-
 
 #### Usage vs Location
 
 We want to identify if there are a relation between the usage of a smartwatch and the user's location
 
-```{r Location - Usage: dataset calculation}
-location_main_usage <- swu %>% 
+```{r Usage - Location: dataset calculation, message=FALSE, warning=FALSE}
+location_usage <- swu %>% 
   group_by(location, usage) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(usage)
 ```
 
 ```{r Usage - Location: Percentage}
 # Chart
-ggplot(location_main_usage, aes(x = factor(location), y = perc*100, fill = factor(usage))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
+ggplot(location_usage, aes(x = factor(location), y = perc * 100, fill = factor(usage))) +
+  geom_bar(stat="identity", width = 0.7, position = "fill") +
   labs(x = "Location", y = "Percent", fill = "usage", title = "Percentage distribution of Usage per Location") +
   theme_minimal(base_size = 14) +
-  geom_text(data = location_main_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  geom_text(data = location_usage, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Usage")) +
+  guides(fill=guide_legend(title = "Usage")) +
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Usage - Location: Grouped by Location, warning=TRUE}
-# Grouped
-ggplot(data = location_main_usage, aes(fill = usage, y = count, x = location)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Location", y = "Count", title = "Distribution of Usage per Location", subtitle = "Usage grouped by Location") +
-  guides(fill=guide_legend(title="Location")) 
+```{r Usage - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = location_usage) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Usage per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Usage - Location - Grouped by Perc Usage, warning=TRUE}
-# Grouped
-ggplot(data = location_main_usage, aes(fill = usage, y = perc * 100, x = location)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Location", y = "Percentage", title = "Percentage distribution of Usage per Location", subtitle = "Usage grouped by location") +
-  guides(fill = guide_legend(title = "Usage")) 
+```{r Usage - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = location_usage) + 
+  geom_bar(
+    aes(x = location, y = count, fill = usage, group = usage), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = usage),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Usage per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### Features

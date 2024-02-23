@@ -1606,56 +1606,179 @@ ggplot(data = locacion_functionalities) +
   theme_bw()
 ```
 
-
-
-
-
-
-
-
-
-
-
 ### Activities
 
 #### Activities vs Gender
 
 We want to identify if there are a relation between the sport activities tracked by users per gender.
 
-```{r Gender - Activities relation}
+```{r Activities - Gender: dataset calculation, message=FALSE, warning=FALSE}
 gender_activities <- activities_grouped_rows %>% 
   group_by(gender, activities) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>%
   drop_na(activities)
+```
 
+
+```{r Gender - Activities: Percentage}
 # Chart
-ggplot(gender_activities, aes(x = factor(gender), y = perc*100, fill = factor(activities))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Gender", y = "Percent", fill = "activities", title = "Percentage distribution of 'Activities' per Gender") +
+ggplot(gender_activities, aes(x = factor(gender), y = perc * 100, fill = factor(activities))) +
+  geom_bar(stat = "identity", width = 0.7, position = "fill") +
+  labs(x = "Gender", y = "Percent", fill = "activities", title = "Percentage distribution of Activities per Gender") +
   theme_minimal(base_size = 14) +
   geom_text(data = gender_activities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Activities"))
+  guides(fill = guide_legend(title = "Activities"))
 ```
+
+```{r Activities - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = gender_activities) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = activities, group = activities), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Activities per Gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Activities - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = gender_activities) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = activities, group = activities), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Activities per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
 #### Activities vs Age
 
 We want to identify if there are a relation between the sport activities tracked by users per age
 
-```{r Age - Activities relation}
+```{r Activities - Age: dataset calculation, message=FALSE, warning=FALSE}
 age_activities <- activities_grouped_rows %>% 
   group_by(age, activities) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
   drop_na(activities)
+```
 
+```{r Activities - Age: Percentage}
 # Chart
-ggplot(age_activities, aes(x = factor(age), y = perc*100, fill = factor(activities))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Age", y = "Percent", fill = "activities", title = "Percentage distribution of 'Activities' per Age") +
+ggplot(age_activities, aes(x = factor(age), y = perc * 100, fill = factor(activities))) +
+  geom_bar(stat = "identity", width = 0.7, position="fill") +
+  labs(x = "Age", y = "Percent", fill = "activities", title = "Percentage distribution of Activities per Age") +
   theme_minimal(base_size = 14) +
   geom_text(data = age_activities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Activities")) +
+  guides(fill = guide_legend(title = "Activities")) +
   theme(axis.text.x = element_text(angle = 45))
 ```
+
+```{r Activities - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = age_activities) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = activities, group = activities), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Activities per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Activities - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = age_activities) + 
+  geom_bar(
+    aes(x = age, y = count, fill = activities, group = activities), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Activities per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Activities vs Location
+
+We want to identify if there are a relation between the sport activities tracked by users per location
+
+```{r Activities - Location: dataset calculation, message=FALSE, warning=FALSE}
+location_activities <- activities_grouped_rows %>% 
+  group_by(location, activities) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(activities)
+```
+
+```{r Activities - Location: Percentage}
+# Chart
+ggplot(location_activities, aes(x = factor(location), y = perc * 100, fill = factor(activities))) +
+  geom_bar(stat = "identity", width = 0.7, position="fill") +
+  labs(x = "Location", y = "Percent", fill = "activities", title = "Percentage distribution of Activities per Location") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = location_activities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill = guide_legend(title = "Activities")) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+```{r Activities - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = location_activities) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = activities, group = activities), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Activities per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Activities - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = location_activities) + 
+  geom_bar(
+    aes(x = location, y = count, fill = activities, group = activities), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = activities),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Activities per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+

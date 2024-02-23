@@ -1431,79 +1431,82 @@ ggplot(data = location_features) +
   theme_bw()
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 ### Functionalities
 
 #### Functionalities vs Gender
 
 We want to identify if there are a relation between the functionalities of a smartwatch and the user's gender.
 
-```{r Functionalities - Gender: dataset calculation}
+```{r Functionalities - Gender: dataset calculation, message=FALSE, warning=FALSE}
 gender_functionalities <- functionalities_grouped_rows %>% 
-  group_by(gender, functionalities) %>% 
+  group_by(gender, functionalities_grouped) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
-  drop_na(functionalities)
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(functionalities_grouped)
 ```
 
-
-```{r Functionalities - Gender relation}
+```{r Functionalities - Gender: Percentage}
 # Chart
-ggplot(gender_functionalities, aes(x = factor(gender), y = perc*100, fill = factor(functionalities))) +
-  geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Gender", y = "Percent", fill = "functionalities", title = "Percentage distribution of 'Functionalities' per Gender") +
+ggplot(gender_functionalities, aes(x = factor(gender), y = perc * 100, fill = factor(functionalities_grouped))) +
+  geom_bar(stat = "identity", width = 0.7, position = "fill") +
+  labs(x = "Gender", y = "Percent", fill = "functionalities_grouped", title = "Percentage distribution of Functionalities per Gender") +
   theme_minimal(base_size = 14) +
   geom_text(data = gender_functionalities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
-  guides(fill=guide_legend(title="Functionalities"))
+  guides(fill = guide_legend(title = "Functionalities"))
 ```
 
-```{r Funcionalities - Gender: Grouped by Gender, warning=TRUE}
-# Grouped
-ggplot(data = gender_functionalities, aes(fill = functionalities, y = count, x = gender)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Gender", y = "Count", title = "Distribution of Functionalities per Gender", subtitle = "Functionalities grouped by Gender") +
-  guides(fill=guide_legend(title="Gender")) 
+```{r Functionalities - Gender: Grouped by Perc Gender, warning=TRUE}
+# Chart
+ggplot(data = gender_functionalities) + 
+  geom_bar(
+    aes(x = gender, y = perc, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = perc, label = ratio, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Gender", y = "Percentage", title = "Distribution of Functionalities per Gender (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
 
-```{r Funcinalities - Gender - Grouped by Perc Functionalities, warning=TRUE}
-# Grouped
-ggplot(data = gender_functionalities, aes(fill = functionalities, y = perc * 100, x = gender)) + 
-  geom_bar(position="dodge", stat="identity", ) + 
-  labs(x = "Gender", y = "Percentage", title = "Percentage distribution of Functionalities per Gender", subtitle = "Functionalities grouped by gender") +
-  guides(fill = guide_legend(title = "Functionalities")) 
+```{r Functionalities - Gender: Grouped by counted Gender, warning=TRUE}
+ggplot(data = gender_functionalities) + 
+  geom_bar(
+    aes(x = gender, y = count, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ gender, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = gender, y = count, label = count, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Gender", y = "Count", title = "Distribution of Functionalities per Gender (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
-
 
 #### Functionalities vs Age
 
 We want to identify if there are a relation between the tracked functionalities of a smartwatch per age.
 
-```{r Functionalities - Age: dataset calculation}
+```{r Functionalities - Age: dataset calculation, message=FALSE, warning=FALSE}
 age_functionalities <- functionalities_grouped_rows %>% 
-  group_by(age, functionalities) %>% 
+  group_by(age, functionalities_grouped) %>% 
   summarise(count = n()) %>% 
-  mutate(perc = count/sum(count), ratio = scales::percent(count/sum(count))) %>% 
-  drop_na(functionalities)
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(functionalities_grouped)
 ```
 
-
-```{r Functionalities - Age relation}
+```{r Functionalities - Age: Percentage}
 # Chart
-ggplot(age_functionalities, aes(x = factor(age), y = perc*100, fill = factor(functionalities))) +
+ggplot(age_functionalities, aes(x = factor(age), y = perc*100, fill = factor(functionalities_grouped))) +
   geom_bar(stat="identity", width = 0.7, position="fill") +
-  labs(x = "Age", y = "Percent", fill = "functionalities", title = "Percentage distribution of 'Functionalities' per Age") +
+  labs(x = "Age", y = "Percent", fill = "functionalities_grouped", title = "Percentage distribution of Functionalities per Age") +
   theme_minimal(base_size = 14) +
   geom_text(data = age_functionalities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
@@ -1511,13 +1514,107 @@ ggplot(age_functionalities, aes(x = factor(age), y = perc*100, fill = factor(fun
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-```{r Funcionalities - Age: Grouped by Gender, warning=TRUE}
-# Grouped
-ggplot(data = gender_functionalities, aes(fill = functionalities, y = count, x = gender)) + 
-  geom_bar(position="dodge", stat="identity") + 
-  labs(x = "Gender", y = "Count", title = "Distribution of Functionalities per Gender", subtitle = "Functionalities grouped by Gender") +
-  guides(fill=guide_legend(title="Gender")) 
+```{r Functionalities - Age: Grouped by Perc Age, warning=TRUE}
+# Chart
+ggplot(data = age_functionalities) + 
+  geom_bar(
+    aes(x = age, y = perc, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = perc, label = ratio, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Age", y = "Percentage", title = "Distribution of Functionalities per Age (%)", subtitle = "Grouped bars version") +
+  theme_bw()
 ```
+
+```{r Functionalities - Age: Grouped by counted Age, warning=TRUE}
+ggplot(data = age_functionalities) + 
+  geom_bar(
+    aes(x = age, y = count, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ age, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = age, y = count, label = count, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Age", y = "Count", title = "Distribution of Functionalities per Age (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+#### Functionalities vs Location
+
+We want to identify if there are a relation between the functionalities of a smartwatch per and the user's location
+
+```{r Functionalities - Location: dataset calculation, message=FALSE, warning=FALSE}
+locacion_functionalities <- functionalities_grouped_rows %>% 
+  group_by(location, functionalities_grouped) %>% 
+  summarise(count = n()) %>% 
+  mutate(perc = count/sum(count), ratio = scales::percent(round(perc, 2))) %>% 
+  drop_na(functionalities_grouped)
+```
+
+```{r Functionalities - Location: Percentage}
+# Chart
+ggplot(locacion_functionalities, aes(x = factor(location), y = perc*100, fill = factor(functionalities_grouped))) +
+  geom_bar(stat="identity", width = 0.7, position="fill") +
+  labs(x = "Location", y = "Percent", fill = "functionalities_grouped", title = "Percentage distribution of Functionalities per Location") +
+  theme_minimal(base_size = 14) +
+  geom_text(data = locacion_functionalities, aes(y = count, label = ratio), position = position_fill(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  guides(fill=guide_legend(title="Functionalities")) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+```{r Functionalities - Location: Grouped by Perc Location, warning=TRUE}
+# Chart
+ggplot(data = locacion_functionalities) + 
+  geom_bar(
+    aes(x = location, y = perc, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat = 'identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = perc, label = ratio, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) +
+  labs(x = "Location", y = "Percentage", title = "Distribution of Functionalities per Location (%)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+```{r Functionalities - Location: Grouped by counted Location, warning=TRUE}
+ggplot(data = locacion_functionalities) + 
+  geom_bar(
+    aes(x = location, y = count, fill = functionalities_grouped, group = functionalities_grouped), 
+    stat='identity', position = 'dodge'
+  ) +
+  facet_wrap(~ location, scales = "free_x", drop = TRUE) +
+  geom_text(
+    aes(x = location, y = count, label = count, group = functionalities_grouped),
+    position = position_dodge(width = 1),
+    vjust = 0.1, size = 3
+  ) +
+  labs(x = "Location", y = "Count", title = "Distribution of Functionalities per Location (Count)", subtitle = "Grouped bars version") +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
+
 
 ### Activities
 
